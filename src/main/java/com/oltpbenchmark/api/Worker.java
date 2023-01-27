@@ -23,6 +23,7 @@ import com.oltpbenchmark.types.DatabaseType;
 import com.oltpbenchmark.types.State;
 import com.oltpbenchmark.types.TransactionStatus;
 import com.oltpbenchmark.util.Histogram;
+import com.google.cloud.spanner.jdbc.JdbcSqlExceptionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -484,6 +485,9 @@ public abstract class Worker<T extends BenchmarkModule> implements Runnable {
     }
 
     private boolean isRetryable(SQLException ex) {
+        if (ex instanceof JdbcSqlExceptionFactory.JdbcAbortedDueToConcurrentModificationException) {
+            return true;
+        }
 
         String sqlState = ex.getSQLState();
         int errorCode = ex.getErrorCode();
